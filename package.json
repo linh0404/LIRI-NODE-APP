@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/linh0404/LIRI-NODE-APP/issues"
   },
-  "homepage": "https://github.com/linh0404/LIRI-NODE-APP#readme"
+  "homepage": "https://github.com/linh0404/LIRI-NODE-APP#readme",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "dotenv": "^8.1.0"
+  }
 }
