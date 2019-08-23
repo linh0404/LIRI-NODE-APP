@@ -3,7 +3,9 @@ require("dotenv").config();
 
 // NPM
 var axios = require('axios');
-
+var moment = require("moment");
+moment().format();
+var fs = require("fs");
 
 
 
@@ -30,12 +32,12 @@ function UserInputs (action, inputParameter) {
         case 'concert-this':
             showConcertInfo(inputParameter);
             break;
-        // case 'spotify-this-song':
-        //     showSongInfo(inputParameter);
-        //     break;
-        // case 'movie-this':
-        //     showMovieInfo(inputParameter);
-        //     break;
+        case 'spotify-this-song':
+            showSongInfo(inputParameter);
+            break;
+        case 'movie-this':
+            showMovieInfo(inputParameter);
+            break;
         // case 'do-what-it-says';
         //     showSomeInfo();
         //     break;
@@ -46,21 +48,61 @@ function UserInputs (action, inputParameter) {
 
 // Function for concert info: BandsInTown
 function showConcertInfo(inputParameter) {
-    var queryURL = "https://rest.bandsintown.com/artists/" + inputParameter + "/events?app_id=codingbootcamp";
-    console.log(queryURL);
-    axios.get(queryURL)
-    .then(function(response) {
-        console.log("Venue name: " + response);
-        // console.log("Venue location: " + venue.city);
-        // console.log("Event date: " + datetime);
-    })
-    .catch(function(error) {
-        console.log(error);
-    })
+    if (inputParameter === "") {
+        console.log("What do you want to look up?");
+    } else {
+        var queryURL = "https://rest.bandsintown.com/artists/" + inputParameter + "/events?app_id=codingbootcamp";
+        console.log(queryURL);
+        axios.get(queryURL)
+        .then(function(response) {
+            var results = response.data;
+            for (i = 0; i < results.length; i++) {
+                var venue = results[i].venue.name;
+                if (results[i].venue.city === "Australia") {
+                    var location = results[i].venue.city + ", " + results[i].venue.location;
+                } else {
+                    results[i].venue.city + ", " + results[i].venue.country;
+                }
+                var date = moment(results[1].datetime);
+                date = date.format("DD/MM/YY");
+                var output = "\nVenue: " + venue + "\nLocation: " + location + "\nDate: " + date;
+                console.log(output);
+                fs.appendFile("log.txt", output, "utf-8", function(err) {
+                    if(err) {
+                        console.log("An error ocurred");
+                    }
+                    console.log("Results recorded");
+                });
+            }
+        });
+    }
 }
 
-// Function for music info: Spotify
+
+// // Function for music info: Spotify
+// function showSongInfo(inputParameter) {
+
+// }
 
 
+// // Function for movie info: OMDBi
+// function showMovieInfo(inputParameter) {
+//     if (inputParameter === undefined) {
+//         inputParameter = "Mr Nobody"
+//         console.log("-------------------");
+//         console.log("If you haven't watched 'Mr. Nobody', then you should: http://www.imdb.com/title/tt0485947");
+//         console.log("It's on Netflix");
+//     }
+//     var queryURL = "http://www.omdbapi.com/?i=tt3896198&apikey=9d11b2c1"
+//     axios.get(queryURL)
+//     .then(function(response) {
+//         console.log("Title: " + movies.Title);
+//     })
+// }   else {
+//     console.log("Error occurred");
+// }
 
-// Function for movie info: OMDBi
+// // Function for reading out of random.txt file
+// function showSomeInfo() {
+    
+// }
