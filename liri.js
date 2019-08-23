@@ -1,13 +1,14 @@
 // Read and set environment variables
 require("dotenv").config();
 
-// NPM
+// node packages
+// var keys = require('./keys.js');
+var Spotify = require('node-spotify-api');
+var spotify = new spotify(keys.spotify);
 var axios = require('axios');
-var moment = require("moment");
+var moment = require('moment');
 moment().format();
-var fs = require("fs");
-
-
+var fs = require('fs');
 
 // var to capture user inputs
 var action = process.argv[2];
@@ -46,43 +47,67 @@ function UserInputs (action, inputParameter) {
     }
 }
 
-// Function for concert info: BandsInTown
-function showConcertInfo(inputParameter) {
-    if (inputParameter === "") {
-        console.log("What do you want to look up?");
-    } else {
-        var queryURL = "https://rest.bandsintown.com/artists/" + inputParameter + "/events?app_id=codingbootcamp";
-        console.log(queryURL);
-        axios.get(queryURL)
-        .then(function(response) {
-            var results = response.data;
-            for (i = 0; i < results.length; i++) {
-                var venue = results[i].venue.name;
-                if (results[i].venue.city === "Australia") {
-                    var location = results[i].venue.city + ", " + results[i].venue.location;
-                } else {
-                    results[i].venue.city + ", " + results[i].venue.country;
-                }
-                var date = moment(results[1].datetime);
-                date = date.format("DD/MM/YY");
-                var output = "\nVenue: " + venue + "\nLocation: " + location + "\nDate: " + date;
-                console.log(output);
-                fs.appendFile("log.txt", output, "utf-8", function(err) {
-                    if(err) {
-                        console.log("An error ocurred");
-                    }
-                    console.log("Results recorded");
-                });
-            }
-        });
-    }
-}
-
-
-// // Function for music info: Spotify
-// function showSongInfo(inputParameter) {
-
+// // Function for concert info: BandsInTown
+// function showConcertInfo(inputParameter) {
+//     if (inputParameter === "") {
+//         console.log("What do you want to look up?");
+//     } else {
+//         var queryURL = "https://rest.bandsintown.com/artists/" + inputParameter + "/events?app_id=codingbootcamp";
+//         console.log(queryURL);
+//         axios.get(queryURL)
+//         .then(function(response) {
+//             var results = response.data;
+//             for (i = 0; i < results.length; i++) {
+//                 var venue = results[i].venue.name;
+//                 if (results[i].venue.city === "Australia") {
+//                     var location = results[i].venue.city + ", " + results[i].venue.location;
+//                 } else {
+//                     results[i].venue.city + ", " + results[i].venue.country;
+//                 }
+//                 var date = moment(results[1].datetime);
+//                 date = date.format("DD/MM/YY");
+//                 var output = "\nVenue: " + venue + "\nLocation: " + location + "\nDate: " + date;
+//                 console.log(output);
+//                 fs.appendFile("log.txt", output, "utf-8", function(err) {
+//                     if(err) {
+//                         console.log("An error ocurred");
+//                     }
+//                     console.log("Event recorded");
+//                 });
+//             }
+//         });
+//     }
 // }
+
+
+// Function for music info: Spotify
+function showSongInfo(inputParameter) {
+    if(inputParameter === "") {
+        inputParameter = "The Sign Ace of Base";
+    }
+    spotify.search({ 
+        type: "track",
+        query: inputParameter,
+    },
+    function(err, data) {
+        if(err) {
+            return console.log("Get better taste in music - your song is too obscure");
+        }
+        var results = data.tracks.item[0];
+        var artist = results.artists[0].name;
+        var name = results.name;
+        var preview = results.preview_url;
+        var album = results.album.name;
+        var output = "\nArtist: " + artist + "\nSong Name: " + name + "\nPreview Link: " + preview + "\nAlbum: " + album;
+        console.log(output);
+        fs.appendFile("log.txt", output, "utf-8", function(err) {
+            if(err) {
+                console.log("An error ocurred");
+            }
+            console.log("Song recorded")
+        })
+    })
+}
 
 
 // // Function for movie info: OMDBi
