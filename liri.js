@@ -4,25 +4,23 @@ require("dotenv").config();
 // node packages
 var keys = require('./keys.js');
 var Spotify = require('node-spotify-api');
-var spotify = new spotify(keys.spotify);
 var axios = require('axios');
 var moment = require('moment');
 moment().format();
 var fs = require('fs');
 
+
+var spotify = new Spotify(keys.spotify);
 // var to capture user inputs
 var action = process.argv[2];
 var nodeArgs = process.argv;
 var inputParameter = "";
 
-for (var i = 2; i < nodeArgs.length; i++) {
 
-    if (i > 2 && i < nodeArgs.length) {
-      inputParameter = inputParameter + "+" + nodeArgs[i];
-    } else {
-      inputParameter += nodeArgs[i];
-    }
-  }
+process.argv.splice(3).forEach(function(inputItems){
+    inputParameter = inputParameter  + inputItems
+})
+
 
 // Execute function
 userInputs(action, inputParameter);
@@ -39,7 +37,7 @@ function userInputs (action, inputParameter) {
         case 'movie-this':
             showMovieInfo(inputParameter);
             break;
-        case 'do-what-it-says';
+        case 'do-what-it-says':
             showSomeInfo();
             break;
         default:
@@ -85,27 +83,30 @@ function showSongInfo(inputParameter) {
     if(inputParameter === "") {
         inputParameter = "The Sign Ace of Base";
     }
+    console.log(inputParameter);
     spotify.search({ 
         type: "track",
         query: inputParameter,
     },
     function(err, data) {
         if(err) {
+            console.log(err);
             return console.log("Get better taste in music - your song is too obscure");
         }
-        var results = data.tracks.item[0];
-        var artist = results.artists[0].name;
-        var name = results.name;
-        var preview = results.preview_url;
-        var album = results.album.name;
-        var output = "\nArtist: " + artist + "\nSong Name: " + name + "\nPreview Link: " + preview + "\nAlbum: " + album;
-        console.log(output);
-        fs.appendFile("log.txt", output, "utf-8", function(err) {
-            if(err) {
-                console.log("An error ocurred");
-            }
-            console.log("Song recorded")
-        })
+        console.log(data);
+        // var results = data.tracks.item[0];
+        // var artist = results.artists[0].name;
+        // var name = results.name;
+        // var preview = results.preview_url;
+        // var album = results.album.name;
+        // var output = "\nArtist: " + artist + "\nSong Name: " + name + "\nPreview Link: " + preview + "\nAlbum: " + album;
+        // console.log(output);
+        // fs.appendFile("log.txt", output, "utf-8", function(err) {
+        //     if(err) {
+        //         console.log("An error ocurred");
+        //     }
+        //     console.log("Song recorded")
+        // })
     })
 }
 
@@ -127,7 +128,7 @@ function showMovieInfo(inputParameter) {
        var year = results.Year;
        ratingsArr = results.Ratings;
        var IMDB = ratingsArr;
-        .filter(function(item) {
+        results.data.forEach(function(item) {
             return item.Source === "Internet Movie Database";
         })
         .map(function(item) {
